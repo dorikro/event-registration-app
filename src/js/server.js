@@ -6,6 +6,7 @@ const csurf = require('csurf');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const figlet = require('figlet');
+const fs = require('fs');
 
 const app = express();
 const port = 80;
@@ -125,6 +126,12 @@ app.post('/api/registrants', [
     }
     res.send('Registrant added/updated successfully');
   });
+});
+
+// API to get admin password
+app.get('/api/admin-password', (req, res) => {
+  const adminPassword = fs.readFileSync('/run/secrets/admin-password', 'utf8').trim();
+  res.send({ password: adminPassword });
 });
 
 app.listen(port, () => {

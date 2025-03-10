@@ -14,7 +14,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const passwordSubmit = document.getElementById('password-submit');
     const adminPassword = document.getElementById('admin-password');
 
-    const correctPassword = 'admin123'; // Change this to your desired password
+    let correctPassword = '';
+
+    // Fetch the admin password from the server
+    fetch('/api/admin-password')
+        .then(response => response.json())
+        .then(data => {
+            correctPassword = data.password;
+        })
+        .catch(error => console.error('Error fetching admin password:', error));
 
     passwordSubmit.addEventListener('click', function() {
         if (adminPassword.value === correctPassword) {
