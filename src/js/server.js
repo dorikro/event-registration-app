@@ -130,7 +130,7 @@ app.post('/api/registrants', [
 
 // API to get admin password
 app.get('/api/admin-password', (req, res) => {
-  const adminPassword = fs.readFileSync('/run/secrets/admin-password', 'utf8').trim();
+  const adminPassword = process.env.ADMIN_PASSWORD;
   res.send({ password: adminPassword });
 });
 
