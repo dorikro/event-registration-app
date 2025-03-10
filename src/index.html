@@ -4,38 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Registration</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <pre id="asciiHeadline">
+    <div class="container mt-5">
+        <div class="text-center mb-4">
+            <pre id="asciiHeadline" class="d-inline-block">
                              _   
                             | |  
          _____   _____ _ __ | |_ 
         / _ \ \ / / _ \ '_ \| __|
         |  __/\ V /  __/ | | | |_ 
         \___| \_/ \___|_| |_|\__|
-        </pre>
-        <h1>Register for the Event</h1>
-        <div id="eventDetails">
-            <p id="eventName"></p>
-            <p id="eventDate"></p>
-            <p id="eventLocation"></p>
+            </pre>
         </div>
-        <form id="registrationForm">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-            
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            
-            <label for="phone">Phone Number:</label>
-            <input type="tel" id="phone" name="phone" required>
-            
-            <button type="submit">Register</button>
+        <h1 class="text-center mb-4">Register for the Event</h1>
+        <div id="eventDetails" class="text-center mb-4">
+            <p id="eventName" class="h4"></p>
+            <p id="eventDate" class="h5 text-muted"></p>
+            <p id="eventLocation" class="h5 text-muted"></p>
+        </div>
+        <form id="registrationForm" class="needs-validation" novalidate>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+                <div class="invalid-feedback">Please enter your name.</div>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+                <div class="invalid-feedback">Please enter a valid email address.</div>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required>
+                <div class="invalid-feedback">Please enter your phone number.</div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
         </form>
-        <div id="confirmationMessage" class="hidden"></div>
+        <div id="confirmationMessage" class="alert alert-success mt-4 d-none"></div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

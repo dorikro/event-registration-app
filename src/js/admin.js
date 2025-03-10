@@ -8,6 +8,71 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         addEvent();
     });
+
+    const passwordProtection = document.getElementById('password-protection');
+    const adminContent = document.getElementById('admin-content');
+    const passwordSubmit = document.getElementById('password-submit');
+    const adminPassword = document.getElementById('admin-password');
+
+    const correctPassword = 'admin123'; // Change this to your desired password
+
+    passwordSubmit.addEventListener('click', function() {
+        if (adminPassword.value === correctPassword) {
+            passwordProtection.classList.add('d-none');
+            adminContent.classList.remove('d-none');
+        } else {
+            adminPassword.classList.add('is-invalid');
+        }
+    });
+
+    const eventForm = document.getElementById('event-form');
+    const registrationTableBody = document.getElementById('registration-table').querySelector('tbody');
+
+    eventForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const eventName = document.getElementById('event-name').value;
+        const eventDate = document.getElementById('event-date').value;
+        const eventLocation = document.getElementById('event-location').value;
+
+        fetch('/api/events', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'CSRF-Token': getCookie('XSRF-TOKEN') // Include CSRF token in the headers
+            },
+            body: JSON.stringify({ name: eventName, date: eventDate, location: eventLocation })
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Event added successfully!');
+                eventForm.reset();
+            } else {
+                alert('Failed to add event. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again later.');
+        });
+    });
+
+    // Fetch registered users and populate the table
+    fetch('/api/registrants')
+        .then(response => response.json())
+        .then(registrants => {
+            registrants.forEach(registrant => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${registrant.fullName}</td>
+                    <td>${registrant.email}</td>
+                    <td>${registrant.eventId}</td>
+                    <td><button class="btn btn-danger btn-sm">Delete</button></td>
+                `;
+                registrationTableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error fetching registrants:', error));
 });
 
 function loadEvents() {
@@ -72,4 +137,11 @@ function addEvent() {
 function editRegistrant(id) {
     // Logic to edit registrant
     alert(`Edit registrant with ID: ${id}`);
+}
+
+// Function to get a cookie value by name
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
 }

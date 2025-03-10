@@ -2,7 +2,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #f8f9fa;
 }
 
 h1, h2 {
@@ -10,9 +10,10 @@ h1, h2 {
 }
 
 .container {
-    width: 80%;
+    width: 90%;
     margin: auto;
     overflow: hidden;
+    max-width: 800px;
 }
 
 form {
@@ -65,4 +66,55 @@ input[type="submit"]:hover {
 
 .table tr:hover {
     background-color: #f1f1f1;
+}
+
+#asciiHeadline {
+    font-family: monospace;
+    font-size: 1.2rem;
+}
+
+.needs-validation .form-control:invalid {
+    border-color: #dc3545;
+}
+
+.needs-validation .form-control:invalid:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.alert-success {
+    display: none;
+}
+
+#password-protection {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    form {
+        padding: 15px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    input[type="password"],
+    textarea {
+        padding: 8px;
+        margin: 8px 0;
+    }
+
+    input[type="submit"] {
+        padding: 8px 12px;
+    }
+
+    .table th, .table td {
+        padding: 6px;
+    }
 }

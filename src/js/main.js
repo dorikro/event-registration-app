@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const eventName = document.getElementById('eventName');
     const eventDate = document.getElementById('eventDate');
     const eventLocation = document.getElementById('eventLocation');
-    const asciiHeadline = document.getElementById('asciiHeadline');
 
     // Fetch event information from the backend API
     fetch('/api/event')
@@ -15,14 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
             eventLocation.textContent = `Location: ${event.location}`;
         })
         .catch(error => console.error('Error fetching event information:', error));
-
-    // Fetch ASCII art headline from the backend API
-    fetch('/api/ascii-headline')
-        .then(response => response.json())
-        .then(data => {
-            asciiHeadline.textContent = data.ascii;
-        })
-        .catch(error => console.error('Error fetching ASCII headline:', error));
 
     registrationForm.addEventListener('submit', function(event) {
         event.preventDefault();
@@ -41,17 +32,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => {
             if (response.ok) {
                 confirmationMessage.textContent = 'Registration successful! A confirmation email has been sent.';
-                confirmationMessage.classList.remove('hidden');
+                confirmationMessage.classList.remove('d-none');
                 registrationForm.reset();
             } else {
                 confirmationMessage.textContent = 'Registration failed. Please try again.';
-                confirmationMessage.classList.remove('hidden');
+                confirmationMessage.classList.remove('d-none');
             }
         })
         .catch(error => {
             console.error('Error:', error);
             confirmationMessage.textContent = 'An error occurred. Please try again later.';
-            confirmationMessage.classList.remove('hidden');
+            confirmationMessage.classList.remove('d-none');
         });
     });
 });

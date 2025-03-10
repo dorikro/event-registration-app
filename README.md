@@ -13,17 +13,20 @@ event-registration-app
 │   │   └── styles.css      # Styles for the application
 │   ├── js
 │   │   ├── main.js         # Client-side logic for registration
-│   │   └── admin.js        # Client-side logic for admin dashboard
+│   │   ├── admin.js        # Client-side logic for admin dashboard
+│   │   └── server.js       # Node.js server
 ├── kubernetes
 │   ├── deployment.yaml      # Deployment configuration for the web app
 │   ├── service.yaml         # Service configuration for the web app
-│   └── ingress.yaml         # Ingress rules for external access
+│   ├── ingress.yaml         # Ingress rules for external access
+│   └── secrets.yaml         # Secrets for Redis and email service
 ├── redis
 │   ├── deployment.yaml      # Deployment configuration for Redis
 │   └── service.yaml         # Service configuration for Redis
 ├── Dockerfile                # Instructions to build the Docker image
 ├── README.md                 # Documentation for the project
-└── azure-pipelines.yaml      # Azure DevOps pipeline configuration
+├── azure-pipelines.yaml      # Azure DevOps pipeline configuration
+└── package.json              # Node.js dependencies and scripts
 ```
 
 ## Features
@@ -36,19 +39,20 @@ event-registration-app
 
 1. **Build the Docker Image**:
    Run the following command in the project root:
-   ```
+   ```sh
    docker build -t event-registration-app .
    ```
 
 2. **Deploy to AKS**:
    - Apply the Kubernetes configurations:
-     ```
+     ```sh
+     kubectl apply -f kubernetes/secrets.yaml
      kubectl apply -f kubernetes/deployment.yaml
      kubectl apply -f kubernetes/service.yaml
      kubectl apply -f kubernetes/ingress.yaml
      ```
    - Deploy Redis:
-     ```
+     ```sh
      kubectl apply -f redis/deployment.yaml
      kubectl apply -f redis/service.yaml
      ```
@@ -58,7 +62,7 @@ event-registration-app
 
 4. **Delete the Deployment**:
    To remove the application after the event:
-   ```
+   ```sh
    kubectl delete -f kubernetes/deployment.yaml
    kubectl delete -f kubernetes/service.yaml
    kubectl delete -f kubernetes/ingress.yaml
