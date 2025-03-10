@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-registration-app
+  labels:
+    app: event-registration-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-registration-app
+  template:
+    metadata:
+      labels:
+        app: event-registration-app
+    spec:
+      containers:
+      - name: event-registration-app
+        image: doronacrprod.azurecr.io/event-registration-app:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: redis-host
+        - name: EMAIL_SERVICE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: email-service-secret
+              key: connection-string
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"

@@ -1,0 +1,48 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'event-registration-app'
+  containerRegistry: 'yourContainerRegistry' # Replace with your Azure Container Registry name
+  kubernetesNamespace: 'default' # Replace with your desired Kubernetes namespace
+
+steps:
+- task: Docker@2
+  displayName: 'Build Docker Image'
+  inputs:
+    command: 'buildAndPush'
+    repository: '$(containerRegistry)/$(imageName)'
+    dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+    tags: |
+      $(Build.BuildId)
+
+- task: AzureCLI@2
+  displayName: 'Deploy to AKS'
+  inputs:
+    azureSubscription: 'yourAzureSubscription' # Replace with your Azure subscription
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      kubectl apply -f $(Build.SourcesDirectory)/kubernetes/deployment.yaml
+      kubectl apply -f $(Build.SourcesDirectory)/kubernetes/service.yaml
+      kubectl apply -f $(Build.SourcesDirectory)/kubernetes/ingress.yaml
+      kubectl apply -f $(Build.SourcesDirectory)/redis/deployment.yaml
+      kubectl apply -f $(Build.SourcesDirectory)/redis/service.yaml
+    workingDirectory: '$(Build.SourcesDirectory)'
+
+- task: AzureCLI@2
+  displayName: 'Clean Up AKS Resources'
+  inputs:
+    azureSubscription: 'yourAzureSubscription' # Replace with your Azure subscription
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      kubectl delete -f $(Build.SourcesDirectory)/kubernetes/deployment.yaml
+      kubectl delete -f $(Build.SourcesDirectory)/kubernetes/service.yaml
+      kubectl delete -f $(Build.SourcesDirectory)/kubernetes/ingress.yaml
+      kubectl delete -f $(Build.SourcesDirectory)/redis/deployment.yaml
+      kubectl delete -f $(Build.SourcesDirectory)/redis/service.yaml
+    workingDirectory: '$(Build.SourcesDirectory)'
