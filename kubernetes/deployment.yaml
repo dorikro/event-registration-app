@@ -31,6 +31,11 @@ spec:
             secretKeyRef:
               name: email-service-secret
               key: connection-string
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: event-registration-secrets
+              key: admin-password
         resources:
           limits:
             memory: "512Mi"
