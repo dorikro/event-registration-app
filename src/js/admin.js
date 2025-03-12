@@ -1,47 +1,43 @@
 const apiUrl = 'http://your-api-url'; // Replace with your API URL
 
 document.addEventListener('DOMContentLoaded', function () {
-    loadEvents();
-    loadRegistrants();
-
-    document.getElementById('event-form').addEventListener('submit', function (e) {
-        e.preventDefault();
-        addEvent();
-    });
-
     const passwordProtection = document.getElementById('password-protection');
     const adminContent = document.getElementById('admin-content');
     const passwordSubmit = document.getElementById('password-submit');
     const adminPassword = document.getElementById('admin-password');
+    const statusMessage = document.getElementById('status-message');
 
-    let correctPassword = '';
-
-    // Fetch the admin password from the server
-    fetch('/api/admin-password')
-        .then(response => response.json())
-        .then(data => {
-            correctPassword = data.password;
-        })
-        .catch(error => console.error('Error fetching admin password:', error));
+    // Hardcoded correct password for demonstration purposes
+    const correctPassword = 'admin13}x�3';
 
     passwordSubmit.addEventListener('click', function() {
+        console.log('Entered password:', adminPassword.value); // Log the entered password
         if (adminPassword.value === correctPassword) {
             passwordProtection.classList.add('d-none');
             adminContent.classList.remove('d-none');
+            console.log('Password validation successful'); // Log successful validation
         } else {
             adminPassword.classList.add('is-invalid');
+            console.log('Password validation failed'); // Log failed validation
         }
     });
 
     const eventForm = document.getElementById('event-form');
-    const registrationTableBody = document.getElementById('registration-table').querySelector('tbody');
+
+    if (!eventForm) {
+        console.error('Event form not found');
+        return;
+    }
 
     eventForm.addEventListener('submit', function(event) {
         event.preventDefault();
+        console.log('Event form submitted'); // Log form submission
 
         const eventName = document.getElementById('event-name').value;
         const eventDate = document.getElementById('event-date').value;
         const eventLocation = document.getElementById('event-location').value;
+
+        console.log('Event data:', { name: eventName, date: eventDate, location: eventLocation }); // Log event data
 
         fetch('/api/events', {
             method: 'POST',
@@ -53,17 +49,23 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(response => {
             if (response.ok) {
-                alert('Event added successfully!');
+                showStatusMessage('Event added successfully!', 'success');
                 eventForm.reset();
+                loadEvents();
             } else {
-                alert('Failed to add event. Please try again.');
+                return response.json().then(errorData => {
+                    console.error('Failed to add event:', errorData);
+                    showStatusMessage('Failed to add event. Please try again.', 'danger');
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred. Please try again later.');
+            showStatusMessage('An error occurred. Please try again later.', 'danger');
         });
     });
+
+    const registrationTableBody = document.getElementById('registration-table').querySelector('tbody');
 
     // Fetch registered users and populate the table
     fetch('/api/registrants')
@@ -83,73 +85,20 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => console.error('Error fetching registrants:', error));
 });
 
-function loadEvents() {
-    fetch('/api/events')
-        .then(response => response.json())
-        .then(events => {
-            const eventSelect = document.getElementById('event');
-            eventSelect.innerHTML = '<option value="">Select an event</option>';
-            for (const id in events) {
-                const event = JSON.parse(events[id]);
-                const option = document.createElement('option');
-                option.value = id;
-                option.textContent = event.name;
-                eventSelect.appendChild(option);
-            }
-        })
-        .catch(error => console.error('Error fetching events:', error));
-}
-
-function loadRegistrants() {
-    fetch('/api/registrants')
-        .then(response => response.json())
-        .then(registrants => {
-            const registrationTable = document.getElementById('registration-table').getElementsByTagName('tbody')[0];
-            registrationTable.innerHTML = '';
-            for (const id in registrants) {
-                const registrant = JSON.parse(registrants[id]);
-                const row = registrationTable.insertRow();
-                row.insertCell(0).textContent = registrant.fullName;
-                row.insertCell(1).textContent = registrant.email;
-                row.insertCell(2).textContent = registrant.phoneNumber;
-                row.insertCell(3).textContent = registrant.eventId;
-                row.insertCell(4).innerHTML = `<button onclick="editRegistrant('${id}')">Edit</button>`;
-            }
-        })
-        .catch(error => console.error('Error fetching registrants:', error));
-}
-
-function addEvent() {
-    const id = Date.now().toString();
-    const name = document.getElementById('event-name').value;
-    const date = document.getElementById('event-date').value;
-    const location = document.getElementById('event-location').value;
-    const ownerName = document.getElementById('owner-name').value;
-    const ownerPhone = document.getElementById('owner-phone').value;
-
-    fetch('/api/events', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id, name, date, location, ownerName, ownerPhone })
-    })
-    .then(response => response.text())
-    .then(message => {
-        alert(message);
-        loadEvents();
-    })
-    .catch(error => console.error('Error adding event:', error));
-}
-
-function editRegistrant(id) {
-    // Logic to edit registrant
-    alert(`Edit registrant with ID: ${id}`);
-}
-
 // Function to get a cookie value by name
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+// Function to show status message
+function showStatusMessage(message, type) {
+    const statusMessage = document.getElementById('status-message');
+    statusMessage.textContent = message;
+    statusMessage.className = `alert alert-${type}`;
+    statusMessage.classList.remove('d-none');
+    setTimeout(() => {
+        statusMessage.classList.add('d-none');
+    }, 5000);
 }
