@@ -48,24 +48,23 @@ app.get('/admin', (req, res) => {
 
 // API to get event information
 app.get('/api/event', (req, res) => {
-  client.hgetall('events', (err, events) => {
+  client.get('event', (err, event) => {
     if (err) {
       console.error('Error fetching event information:', err);
       return res.status(500).send('Internal Server Error');
     }
-    const event = JSON.parse(events[Object.keys(events)[0]]); // Assuming there's only one event
-    res.send(event);
+    res.send(JSON.parse(event));
   });
 });
 
 // API to get ASCII art headline
 app.get('/api/ascii-headline', (req, res) => {
-  client.hgetall('events', (err, events) => {
+  client.get('event', (err, event) => {
     if (err) {
       console.error('Error fetching ASCII art headline:', err);
       return res.status(500).send('Internal Server Error');
     }
-    const eventName = events ? JSON.parse(events[Object.keys(events)[0]]).name : 'event';
+    const eventName = event ? JSON.parse(event).name : 'event';
     figlet(eventName, (err, data) => {
       if (err) {
         console.error('Error generating ASCII art headline:', err);
@@ -78,12 +77,12 @@ app.get('/api/ascii-headline', (req, res) => {
 
 // API to get events
 app.get('/api/events', (req, res) => {
-  client.hgetall('events', (err, events) => {
+  client.get('event', (err, event) => {
     if (err) {
       console.error('Error fetching events:', err);
       return res.status(500).send('Internal Server Error');
     }
-    res.send(events);
+    res.send(JSON.parse(event));
   });
 });
 
@@ -100,8 +99,8 @@ app.post('/api/events', [
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { id, name, date, location } = req.body;
-  client.hset('events', id, JSON.stringify({ name, date, location }), (err) => {
+  const { name, date, location } = req.body;
+  client.set('event', JSON.stringify({ name, date, location }), (err) => {
     if (err) {
       console.error('Error adding/updating event:', err);
       return res.status(500).send('Internal Server Error');

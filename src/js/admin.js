@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'CSRF-Token': getCookie('XSRF-TOKEN') // Include CSRF token in the headers
+                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Correct header name
             },
             body: JSON.stringify({ name: eventName, date: eventDate, location: eventLocation })
         })
