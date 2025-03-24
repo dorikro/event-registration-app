@@ -51,8 +51,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }))
         .catch(error => {
             console.error('Error:', error);
-            showStatusMessage(`An error occurred: ${error.message}`, 'danger');
+            showStatusMessage(`An error occurred: ${error.message}. please contact event administrator.`, 'danger');
         });
+    });
+
+    document.getElementById('domainSubmit').addEventListener('click', function() {
+        const userDomain = document.getElementById('companyDomain').value.trim();
+        fetch('/api/event')
+            .then(res => res.json())
+            .then(event => {
+                if (!event.domain) {
+                    alert("The event registration is closed at this time. Please contact the event admin.");
+                    return;
+                }
+                if (event.domain === userDomain) {
+                    document.getElementById('registrationForm').classList.remove('d-none');
+                } else {
+                    alert("Incorrect company domain. Please contact the event admin.");
+                }
+            })
+            .catch(() => {
+                alert("The event registration is closed at this time. Please contact the event admin.");
+            });
     });
 });
 

@@ -26,7 +26,12 @@
             <p id="eventDate" class="h5 text-muted"></p>
             <p id="eventLocation" class="h5 text-muted"></p>
         </div>
-        <form id="registrationForm" class="needs-validation" novalidate>
+        <div class="form-group">
+            <label for="companyDomain">Company Domain</label>
+            <input type="text" class="form-control" id="companyDomain" required>
+            <div class="invalid-feedback">Please enter the company domain.</div>
+        </div>
+        <form id="registrationForm" class="needs-validation d-none" novalidate>
             <div class="form-group">
                 <label for="name">Name:</label>
                 <input type="text" class="form-control" id="name" name="name" required>
@@ -44,6 +49,7 @@
             </div>
             <button type="submit" class="btn btn-primary btn-block">Register</button>
         </form>
+        <button id="domainSubmit" class="btn btn-primary btn-block">Proceed</button>
         <div id="confirmationMessage" class="alert alert-success mt-4 d-none"></div>
         <div id="statusMessage" class="alert d-none mt-4"></div> <!-- Status message element -->
     </div>

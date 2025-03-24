@@ -108,29 +108,70 @@ function showStatusMessage(message, type) {
     }, 5000);
 }
 
+// Modify loadRegistrants to include an "Edit" button for each row
 function loadRegistrants() {
+    const registrationTableBody = document.getElementById('registration-table').querySelector('tbody');
+    registrationTableBody.innerHTML = '';
     fetch('/api/registrants')
-        .then(response => response.json())
-        .then(registrants => {
-            // If your server returns an array of registrants
-            const tableBody = document.getElementById('registration-table').querySelector('tbody');
-            tableBody.innerHTML = ''; // Clear old data
-
-            registrants.forEach(reg => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${reg.fullName}</td>
-                    <td>${reg.email}</td>
-                    <td>${reg.eventId || ''}</td>
-                    <td><button class="btn btn-danger btn-sm">Delete</button></td>
-                `;
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching registrants:', error);
-        });
+      .then(response => response.json())
+      .then(registrants => {
+          registrants.forEach(reg => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                  <td>${reg.name || reg.fullName}</td>
+                  <td>${reg.email}</td>
+                  <td>${reg.phone || reg.eventId || ''}</td>
+                  <td>
+                      <button class="btn btn-sm btn-warning" onclick="editRegistrant('${reg.id}')">Edit</button>
+                      <button class="btn btn-sm btn-danger" onclick="deleteRegistrant('${reg.id}')">Delete</button>
+                  </td>
+              `;
+              registrationTableBody.appendChild(row);
+          });
+      })
+      .catch(error => console.error('Error fetching registrants:', error));
 }
+
+// Implement the editRegistrant function
+function editRegistrant(id) {
+    fetch(`/api/registrants/${id}`)
+      .then(res => res.json())
+      .then(data => {
+          // Display data in a simple prompt or fill a form
+          const newName = prompt("Edit Name:", data.name || data.fullName);
+          const newEmail = prompt("Edit Email:", data.email);
+          const newPhone = prompt("Edit Phone:", data.phone || data.phoneNumber);
+
+          if (newName && newEmail && newPhone) {
+              updateRegistrant(id, newName, newEmail, newPhone);
+          }
+      })
+      .catch(err => console.error('Error editing registrant:', err));
+}
+
+// Implement the updateRegistrant function
+function updateRegistrant(id, name, email, phone) {
+    fetch(`/api/registrants/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
+        },
+        body: JSON.stringify({ fullName: name, email, phoneNumber: phone, eventId: 'event123' })
+    })
+    .then(res => res.json())
+    .then(body => {
+        showStatusMessage(`${body.message}. please contact event administrator.`, 'success');
+        loadRegistrants();
+    })
+    .catch(err => {
+        console.error('Error updating registrant:', err);
+        showStatusMessage(`Error updating registrant: ${err.message}. please contact event administrator.`, 'danger');
+    });
+}
+
+// Add a refresh button
+document.getElementById('refresh-button').addEventListener('click', loadRegistrants);
 
 // Load existing event details
 function loadEvent() {
@@ -194,3 +235,18 @@ function updateRegistrant(id) {
 document.addEventListener('DOMContentLoaded', () => {
     loadRegistrants();
 });
+
+// Implement the deleteRegistrant function
+function deleteRegistrant(id) {
+    if (!confirm("Are you sure you want to delete this registrant?")) return;
+
+    fetch(`/api/registrants/${id}`, {
+        method: 'DELETE'
+    })
+    .then(res => res.json())
+    .then(body => {
+        console.log("Deleted:", body);
+        loadRegistrants(); // Refresh table from Redis
+    })
+    .catch(err => console.error("Error deleting registrant:", err));
+}

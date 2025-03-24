@@ -48,12 +48,10 @@ app.get('/admin', (req, res) => {
 
 // API to get event information
 app.get('/api/event', (req, res) => {
-  client.get('event', (err, event) => {
-    if (err) {
-      console.error('Error fetching event information:', err);
-      return res.status(500).send('Internal Server Error');
-    }
-    res.send(JSON.parse(event));
+  client.get('event', (err, eventData) => {
+    if (err) return res.status(500).json({ message: "Redis error" });
+    if (!eventData) return res.status(400).json({ message: "No event found" });
+    res.json(JSON.parse(eventData));
   });
 });
 
@@ -89,7 +87,10 @@ app.get('/api/events', (req, res) => {
 // API to add/update event
 app.post('/api/events', [
   body('name').isString().trim().escape(),
+  body('domain').isString().trim().escape(),
   body('date').isISO8601().toDate(),
+  body('startTime').matches(/^\d{2}:\d{2}$/),
+  body('endTime').matches(/^\d{2}:\d{2}$/),
   body('location').isString().trim().escape()
 ], (req, res) => {
   console.log('POST /api/events received:', req.body);
@@ -99,13 +100,13 @@ app.post('/api/events', [
     return res.status(400).json({ message: 'Validation errors', errors: errors.array() });
   }
 
-  const { name, date, location } = req.body;
-  client.set('event', JSON.stringify({ name, date, location }), (err) => {
+  const { name, domain, date, startTime, endTime, location } = req.body;
+  client.set('event', JSON.stringify({ name, domain, date, startTime, endTime, location }), (err) => {
     if (err) {
       console.error('Redis error adding/updating event:', err);
       return res.status(500).json({ message: 'Redis error', error: err.message });
     }
-    console.log('Event added/updated successfully:', { name, date, location });
+    console.log('Event added/updated successfully:', { name, domain, date, startTime, endTime, location });
     res.json({ message: 'Event added/updated successfully' });
   });
 });
@@ -115,24 +116,51 @@ app.post('/api/registrants', [
   body('name').isString().trim().escape(),
   body('email').isEmail().normalizeEmail(),
   body('phone').isMobilePhone()
-], (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.error('Validation errors:', errors.array());
-    return res.status(400).json({ message: 'Validation errors', errors: errors.array() });
-  }
-
-  const { name, email, phone } = req.body;
-  const registrantId = `registrant:${Date.now()}`;
-
-  client.hset('registrants', registrantId, JSON.stringify({ name, email, phone }), (err) => {
-    if (err) {
-      console.error('Redis error adding registrant:', err);
-      return res.status(500).json({ message: 'Redis error', error: err.message });
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: `Validation errors. please contact event administrator.`,
+        errors: errors.array()
+      });
     }
-    console.log('Registrant added successfully:', { name, email, phone });
-    res.json({ message: 'Registrant added successfully' });
-  });
+
+    const { name, email, phone } = req.body;
+
+    // Fetch all registrants
+    const allRegistrants = await new Promise((resolve, reject) => {
+      client.hgetall('registrants', (err, data) => {
+        if (err) return reject(err);
+        resolve(data ? Object.values(data).map(JSON.parse) : []);
+      });
+    });
+
+    // Check for duplicates
+    const duplicate = allRegistrants.find(r => r.email === email || r.phone === phone);
+    if (duplicate) {
+      return res.status(400).json({
+        message: `User with this email or phone already registered. please contact event administrator.`
+      });
+    }
+
+    // No duplicates => proceed
+    const registrantId = `registrant:${Date.now()}`;
+    client.hset('registrants', registrantId, JSON.stringify({ name, email, phone }), (err) => {
+      if (err) {
+        console.error('Redis error adding registrant:', err);
+        return res.status(500).json({
+          message: `Redis error. please contact event administrator.`,
+          error: err.message
+        });
+      }
+      console.log('Registrant added successfully:', { name, email, phone });
+      res.json({ message: 'Registrant added successfully' });
+    });
+  } catch (error) {
+    console.error('Error in /api/registrants:', error);
+    res.status(500).json({ message: `Server error. please contact event administrator.`, error: error.message });
+  }
 });
 
 // API to get registrants

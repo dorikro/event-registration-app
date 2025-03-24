@@ -1,68 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/styles.css" />
     <script src="js/admin.js" defer></script>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container py-5">
         <h1 class="text-center mb-4">Admin Dashboard</h1>
-        
+
         <!-- Password Protection -->
-        <div id="password-protection" class="text-center">
-            <div class="form-group">
-                <label for="admin-password">Enter Admin Password:</label>
-                <input type="password" class="form-control" id="admin-password" required>
-                <div class="invalid-feedback">Please enter the correct password.</div>
+        <div id="password-protection" class="card mx-auto mb-5" style="max-width: 400px;">
+            <div class="card-body">
+                <h5 class="card-title text-center">Admin Login</h5>
+                <div class="form-group">
+                    <label for="admin-password">Password</label>
+                    <input type="password" class="form-control" id="admin-password" required />
+                    <div class="invalid-feedback">Please enter the correct password.</div>
+                </div>
+                <button id="password-submit" class="btn btn-primary btn-block">Submit</button>
             </div>
-            <button id="password-submit" class="btn btn-primary">Submit</button>
         </div>
 
         <!-- Admin Content -->
         <div id="admin-content" class="d-none">
-            <div id="status-message" class="alert d-none"></div> <!-- Status message element -->
-            <form id="event-form" class="mb-4">
-                <h2>Add Event Details</h2>
-                <div class="form-group">
-                    <label for="event-name">Event Name:</label>
-                    <input type="text" class="form-control" id="event-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="event-date">Event Date:</label>
-                    <input type="date" class="form-control" id="event-date" required>
-                </div>
-                <div class="form-group">
-                    <label for="event-location">Event Location:</label>
-                    <input type="text" class="form-control" id="event-location" required>
-                </div>
-                <button type="submit" class="btn btn-success">Add Event</button>
-            </form>
+            <div id="status-message" class="alert d-none"></div>
 
-            <form id="registrant-edit-form" class="mb-4">
-                <h2>Edit Registrant Details</h2>
-                <input type="hidden" id="registrant-id">
-                <div class="form-group">
-                    <label for="registrant-fullName">Full Name:</label>
-                    <input type="text" class="form-control" id="registrant-fullName" required>
+            <!-- Event Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Event Details</h4>
+                    <form id="event-form" novalidate>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="event-name">Name</label>
+                                <input type="text" class="form-control" id="event-name" required />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="event-date">Date</label>
+                                <input type="date" class="form-control" id="event-date" required />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="event-location">Location</label>
+                                <input type="text" class="form-control" id="event-location" required />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="event-domain">Company Domain</label>
+                                <input type="text" class="form-control" id="event-domain" required />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="event-startTime">Start Time</label>
+                                <input type="time" class="form-control" id="event-startTime" required />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="event-endTime">End Time</label>
+                                <input type="time" class="form-control" id="event-endTime" required />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Add/Update Event</button>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="registrant-email">Email:</label>
-                    <input type="email" class="form-control" id="registrant-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="registrant-phoneNumber">Phone Number:</label>
-                    <input type="tel" class="form-control" id="registrant-phoneNumber" required>
-                </div>
-                <button type="submit" class="btn btn-success">Update Registrant</button>
-            </form>
+            </div>
 
-            <h2>Registered Users</h2>
-            <table class="table table-striped" id="registration-table">
-                <thead>
+            <!-- Edit Registrant Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Edit Registrant</h4>
+                    <form id="registrant-edit-form" novalidate>
+                        <input type="hidden" id="registrant-id" />
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="registrant-fullName">Full Name</label>
+                                <input type="text" class="form-control" id="registrant-fullName" required />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="registrant-email">Email</label>
+                                <input type="email" class="form-control" id="registrant-email" required />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="registrant-phoneNumber">Phone</label>
+                                <input type="tel" class="form-control" id="registrant-phoneNumber" required />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Update Registrant</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Registered Users Section -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Registered Users</h4>
+                <button id="refresh-button" class="btn btn-info">Refresh</button>
+            </div>
+            <table class="table table-hover" id="registration-table">
+                <thead class="thead-light">
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
@@ -75,10 +109,12 @@
                 </tbody>
             </table>
         </div>
+
         <div class="text-center mt-4">
-            <p>Version: <span id="version-number">v.0.0.17</span></p> <!-- Version number element -->
+            <p>Version: <span id="version-number">v.0.0.17</span></p>
         </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
