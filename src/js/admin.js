@@ -31,37 +31,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     eventForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        console.log('Event form submitted'); // Log form submission
+
+        if (!eventForm.checkValidity()) {
+            eventForm.classList.add('was-validated');
+            return;
+        }
 
         const eventName = document.getElementById('event-name').value;
         const eventDate = document.getElementById('event-date').value;
         const eventLocation = document.getElementById('event-location').value;
 
-        console.log('Event data:', { name: eventName, date: eventDate, location: eventLocation }); // Log event data
-
         fetch('/api/events', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Correct header name
+                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
             },
             body: JSON.stringify({ name: eventName, date: eventDate, location: eventLocation })
         })
-        .then(response => {
+        .then(response => response.json().then(body => {
             if (response.ok) {
-                showStatusMessage('Event added successfully!', 'success');
+                showStatusMessage(body.message, 'success');
                 eventForm.reset();
+                eventForm.classList.remove('was-validated');
                 loadEvents();
             } else {
-                return response.json().then(errorData => {
-                    console.error('Failed to add event:', errorData);
-                    showStatusMessage('Failed to add event. Please try again.', 'danger');
-                });
+                console.error('Event addition failed:', body);
+                showStatusMessage(`Failed to add event: ${body.message}`, 'danger');
             }
-        })
+        }))
         .catch(error => {
             console.error('Error:', error);
-            showStatusMessage('An error occurred. Please try again later.', 'danger');
+            showStatusMessage(`An error occurred: ${error.message}`, 'danger');
         });
     });
 
@@ -83,6 +84,10 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         })
         .catch(error => console.error('Error fetching registrants:', error));
+
+    // Call this function after successful login or page load
+    loadRegistrants();
+    loadEvent();
 });
 
 // Function to get a cookie value by name
@@ -102,3 +107,90 @@ function showStatusMessage(message, type) {
         statusMessage.classList.add('d-none');
     }, 5000);
 }
+
+function loadRegistrants() {
+    fetch('/api/registrants')
+        .then(response => response.json())
+        .then(registrants => {
+            // If your server returns an array of registrants
+            const tableBody = document.getElementById('registration-table').querySelector('tbody');
+            tableBody.innerHTML = ''; // Clear old data
+
+            registrants.forEach(reg => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${reg.fullName}</td>
+                    <td>${reg.email}</td>
+                    <td>${reg.eventId || ''}</td>
+                    <td><button class="btn btn-danger btn-sm">Delete</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching registrants:', error);
+        });
+}
+
+// Load existing event details
+function loadEvent() {
+    fetch('/api/event')
+        .then(res => res.json())
+        .then(event => {
+            if (event && event.name) {
+                document.getElementById('event-name').value = event.name;
+                document.getElementById('event-date').value = event.date.split('T')[0];
+                document.getElementById('event-location').value = event.location;
+            document.getElementById('event-form-submit').textContent = 'Update Event';
+            }
+        })
+        .catch(() => {
+            document.getElementById('event-form-submit').textContent = 'Create Event';
+        });
+}
+
+// Edit registrant
+function editRegistrant(id) {
+    fetch(`/api/registrants/${id}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('registrant-fullName').value = data.fullName;
+            document.getElementById('registrant-email').value = data.email;
+            document.getElementById('registrant-phoneNumber').value = data.phoneNumber;
+            document.getElementById('registrant-id').value = id;
+            document.getElementById('registrant-form-submit').textContent = 'Update Registrant';
+        });
+}
+
+// Submit registrant update
+function updateRegistrant(id) {
+    const data = {
+        fullName: document.getElementById('registrant-fullName').value,
+        email: document.getElementById('registrant-email').value,
+        phoneNumber: document.getElementById('registrant-phoneNumber').value,
+        eventId: 'event'
+    };
+
+    fetch(`/api/registrants/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(body => {
+        showStatusMessage(body.message, 'success');
+        loadRegistrants();
+    })
+    .catch(err => {
+        console.error('Error updating registrant:', err);
+        showStatusMessage(`Error updating registrant: ${err.message}`, 'danger');
+    });
+}
+
+// Ensure this function is called when the admin page loads
+document.addEventListener('DOMContentLoaded', () => {
+    loadRegistrants();
+});

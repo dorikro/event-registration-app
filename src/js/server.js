@@ -92,21 +92,46 @@ app.post('/api/events', [
   body('date').isISO8601().toDate(),
   body('location').isString().trim().escape()
 ], (req, res) => {
-  console.log('Received request to add/update event:', req.body); // Add logging
+  console.log('POST /api/events received:', req.body);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.error('Validation errors:', errors.array());
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ message: 'Validation errors', errors: errors.array() });
   }
 
   const { name, date, location } = req.body;
   client.set('event', JSON.stringify({ name, date, location }), (err) => {
     if (err) {
-      console.error('Error adding/updating event:', err);
-      return res.status(500).send('Internal Server Error');
+      console.error('Redis error adding/updating event:', err);
+      return res.status(500).json({ message: 'Redis error', error: err.message });
     }
-    console.log('Event added/updated successfully');
-    res.send('Event added/updated successfully');
+    console.log('Event added/updated successfully:', { name, date, location });
+    res.json({ message: 'Event added/updated successfully' });
+  });
+});
+
+// API to add registrant
+app.post('/api/registrants', [
+  body('name').isString().trim().escape(),
+  body('email').isEmail().normalizeEmail(),
+  body('phone').isMobilePhone()
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.error('Validation errors:', errors.array());
+    return res.status(400).json({ message: 'Validation errors', errors: errors.array() });
+  }
+
+  const { name, email, phone } = req.body;
+  const registrantId = `registrant:${Date.now()}`;
+
+  client.hset('registrants', registrantId, JSON.stringify({ name, email, phone }), (err) => {
+    if (err) {
+      console.error('Redis error adding registrant:', err);
+      return res.status(500).json({ message: 'Redis error', error: err.message });
+    }
+    console.log('Registrant added successfully:', { name, email, phone });
+    res.json({ message: 'Registrant added successfully' });
   });
 });
 
@@ -115,9 +140,10 @@ app.get('/api/registrants', (req, res) => {
   client.hgetall('registrants', (err, registrants) => {
     if (err) {
       console.error('Error fetching registrants:', err);
-      return res.status(500).send('Internal Server Error');
+      return res.status(500).json({ message: 'Redis error', error: err.message });
     }
-    res.send(registrants);
+    const registrantsArray = registrants ? Object.entries(registrants).map(([id, data]) => ({ id, ...JSON.parse(data) })) : [];
+    res.json(registrantsArray);
   });
 });
 
@@ -128,21 +154,46 @@ app.post('/api/registrants', [
   body('phoneNumber').isMobilePhone(),
   body('eventId').isString().trim().escape()
 ], (req, res) => {
-  console.log('Received request to add/update registrant:', req.body);
+  console.log('POST /api/registrants received:', req.body);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.error('Validation errors:', errors.array());
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ message: 'Validation errors', errors: errors.array() });
   }
 
   const { id, fullName, email, phoneNumber, eventId } = req.body;
   client.hset('registrants', id, JSON.stringify({ fullName, email, phoneNumber, eventId }), (err) => {
     if (err) {
-      console.error('Error adding/updating registrant:', err);
-      return res.status(500).send('Internal Server Error');
+      console.error('Redis error adding/updating registrant:', err);
+      return res.status(500).json({ message: 'Redis error', error: err.message });
     }
     console.log('Registrant added/updated successfully');
-    res.send('Registrant added/updated successfully');
+    res.status(200).json({ message: 'Registrant added/updated successfully' });
+  });
+});
+
+// API to update registrant details
+app.put('/api/registrants/:id', [
+  body('fullName').isString().trim().escape(),
+  body('email').isEmail().normalizeEmail(),
+  body('phoneNumber').isMobilePhone()
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.error('Validation errors:', errors.array());
+    return res.status(400).json({ message: 'Validation errors', errors: errors.array() });
+  }
+
+  const registrantId = req.params.id;
+  const { fullName, email, phoneNumber, eventId } = req.body;
+
+  client.hset('registrants', registrantId, JSON.stringify({ fullName, email, phoneNumber, eventId }), (err) => {
+    if (err) {
+      console.error('Redis error updating registrant:', err);
+      return res.status(500).json({ message: 'Redis error', error: err.message });
+    }
+    console.log('Registrant updated successfully:', { fullName, email, phoneNumber });
+    res.json({ message: 'Registrant updated successfully' });
   });
 });
 
@@ -159,6 +210,11 @@ app.get('/api/test-redis', (req, res) => {
       res.send(`Redis connection successful: ${value}`);
     });
   });
+});
+
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.stack);
+  res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
 app.listen(port, () => {

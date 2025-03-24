@@ -19,28 +19,39 @@ document.addEventListener('DOMContentLoaded', function() {
     registrationForm.addEventListener('submit', function(event) {
         event.preventDefault();
 
+        if (!registrationForm.checkValidity()) {
+            registrationForm.classList.add('was-validated');
+            return;
+        }
+
         const formData = new FormData(registrationForm);
-        const data = Object.fromEntries(formData.entries());
+        const data = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            phone: formData.get('phone')
+        };
 
         fetch('/api/registrants', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN') // Correct header name
+                'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
             },
             body: JSON.stringify(data)
         })
-        .then(response => {
+        .then(response => response.json().then(body => {
             if (response.ok) {
-                showStatusMessage('Registration successful! A confirmation email has been sent.', 'success');
+                showStatusMessage(body.message, 'success');
                 registrationForm.reset();
+                registrationForm.classList.remove('was-validated');
             } else {
-                showStatusMessage('Registration failed. Please try again.', 'danger');
+                console.error('Registration failed:', body);
+                showStatusMessage(`Registration failed: ${body.message}`, 'danger');
             }
-        })
+        }))
         .catch(error => {
             console.error('Error:', error);
-            showStatusMessage('An error occurred. Please try again later.', 'danger');
+            showStatusMessage(`An error occurred: ${error.message}`, 'danger');
         });
     });
 });

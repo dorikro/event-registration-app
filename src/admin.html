@@ -42,6 +42,24 @@
                 <button type="submit" class="btn btn-success">Add Event</button>
             </form>
 
+            <form id="registrant-edit-form" class="mb-4">
+                <h2>Edit Registrant Details</h2>
+                <input type="hidden" id="registrant-id">
+                <div class="form-group">
+                    <label for="registrant-fullName">Full Name:</label>
+                    <input type="text" class="form-control" id="registrant-fullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="registrant-email">Email:</label>
+                    <input type="email" class="form-control" id="registrant-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registrant-phoneNumber">Phone Number:</label>
+                    <input type="tel" class="form-control" id="registrant-phoneNumber" required>
+                </div>
+                <button type="submit" class="btn btn-success">Update Registrant</button>
+            </form>
+
             <h2>Registered Users</h2>
             <table class="table table-striped" id="registration-table">
                 <thead>
