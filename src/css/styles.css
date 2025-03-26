@@ -1,5 +1,6 @@
+/* Use the Inter font */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f8f9fa;
@@ -35,6 +36,16 @@ textarea {
     border-radius: 4px;
 }
 
+/* Smoother, modern look for inputs */
+.input-shadow {
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s;
+}
+
+.input-shadow:focus {
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
 input[type="submit"] {
     background: #5cb85c;
     color: #fff;
@@ -46,6 +57,17 @@ input[type="submit"] {
 
 input[type="submit"]:hover {
     background: #4cae4c;
+}
+
+/* Buttons with a subtle gradient */
+.btn-gradient {
+    background: linear-gradient(135deg, #58a 0%, #5af 100%);
+    border: none;
+    color: #fff;
+}
+
+.btn-gradient:hover {
+    opacity: 0.9;
 }
 
 .table {
@@ -90,31 +112,41 @@ input[type="submit"]:hover {
     margin: 0 auto;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .container {
-        width: 100%;
-        padding: 0 10px;
-    }
+/* 2x2 grid for event details, squares colored in MS style */
+#eventGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 10px;
+}
 
-    form {
-        padding: 15px;
-    }
+/* Each square is equally sized */
+.event-square {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    border-radius: 5px;
+    text-transform: capitalize;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 
-    input[type="text"],
-    input[type="email"],
-    input[type="date"],
-    input[type="password"],
-    textarea {
-        padding: 8px;
-        margin: 8px 0;
-    }
+.event-text {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: 500;
+}
 
-    input[type="submit"] {
-        padding: 8px 12px;
-    }
-
-    .table th, .table td {
-        padding: 6px;
-    }
+/* Four squares with MS-inspired colors */
+.bg-red {
+    background-color: #f25022;
+}
+.bg-green {
+    background-color: #7fba00;
+}
+.bg-blue {
+    background-color: #00a4ef;
+}
+.bg-yellow {
+    background-color: #ffb900;
 }

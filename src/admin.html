@@ -6,7 +6,6 @@
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/styles.css" />
-    <script src="js/admin.js" defer></script>
 </head>
 <body>
     <div class="container py-5">
@@ -53,11 +52,11 @@
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="event-startTime">Start Time</label>
-                                <input type="time" class="form-control" id="event-startTime" required />
+                                <input type="time" class="form-control" id="event-startTime" value="10:00" required />
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="event-endTime">End Time</label>
-                                <input type="time" class="form-control" id="event-endTime" required />
+                                <input type="time" class="form-control" id="event-endTime" value="15:00" required />
                             </div>
                         </div>
                         <button type="submit" class="btn btn-success">Add/Update Event</button>
@@ -100,7 +99,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Event</th>
+                        <th>Phone</th> 
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -108,15 +107,38 @@
                     <!-- Registered users will be populated here -->
                 </tbody>
             </table>
-        </div>
-
-        <div class="text-center mt-4">
-            <p>Version: <span id="version-number">v.0.0.17</span></p>
+            <div class="text-center mt-4">
+                <p>Version: <span id="version-number">v.0.0.17</span></p>
+            </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-Mlusm6Mllqr2TM0X2E7FN8zCbuaCzEup49v9GhJZ7uc=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const eventForm = document.getElementById('event-form');
+
+            // Fetch existing event details and populate the form
+            fetch('/api/event')
+                .then(response => response.json())
+                .then(event => {
+                    if (event && event.name) {
+                        // Fill form with existing event data
+                        document.getElementById('event-name').value = event.name || '';
+                        document.getElementById('event-date').value = event.date ? event.date.split('T')[0] : '';
+                        document.getElementById('event-location').value = event.location || '';
+                        document.getElementById('event-domain').value = event.domain || '';
+                        document.getElementById('event-startTime').value = event.startTime || '10:00';
+                        document.getElementById('event-endTime').value = event.endTime || '15:00';
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load existing event:', err);
+                });
+        });
+    </script>
+    <script src="js/admin.js" defer></script>
 </body>
 </html>

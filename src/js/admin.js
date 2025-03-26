@@ -312,3 +312,24 @@ function deleteRegistrant(id) {
 document.addEventListener('DOMContentLoaded', () => {
   loadRegistrants();
 });
+
+fetch('/api/registrants')
+  .then(response => response.json())
+  .then(registrants => {
+    const tableBody = document.getElementById('registration-table').querySelector('tbody');
+    tableBody.innerHTML = '';
+    registrants.forEach((r) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${r.fullName || r.name || ''}</td>
+        <td>${r.email || ''}</td>
+        <td>${r.phoneNumber || ''}</td> <!-- replaced with phone -->
+        <td>
+          <button class="btn btn-sm btn-warning" onclick="editRegistrant('${r.id}')">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteRegistrant('${r.id}')">Delete</button>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+  })
+  .catch(error => console.error('Error fetching registrants:', error));

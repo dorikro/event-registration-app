@@ -1,58 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Event Registration</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.gstatic.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet"/>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css" />
+
     <script src="js/main.js" defer></script>
 </head>
 <body>
     <div class="container mt-5">
+
         <!-- Dynamic Header -->
-        <div id="eventBanner" class="card text-center mb-4">
+        <div id="eventBanner" class="card text-center mb-4 shadow-sm rounded">
             <div class="card-body">
                 <h1 id="dynamicHeadline" class="card-title mb-0">Loading event...</h1>
             </div>
         </div>
 
-        <div id="eventDetails" class="text-center mb-4">
-            <p id="eventName" class="h4"></p>
-            <p id="eventDate" class="h5 text-muted"></p>
-            <p id="eventLocation" class="h5 text-muted"></p>
+        <!-- Event Details (2x2 Color Grid) -->
+        <div id="eventGrid" class="d-flex flex-wrap justify-content-between mb-4">
+            <div class="event-square bg-red">
+                <p id="eventDate" class="event-text"></p>
+            </div>
+            <div class="event-square bg-green">
+                <p id="eventTime" class="event-text"></p>
+            </div>
+            <div class="event-square bg-blue">
+                <p id="eventLocation" class="event-text"></p>
+            </div>
+            <div class="event-square bg-yellow">
+                <p id="eventExtra" class="event-text">N/A</p>
+            </div>
         </div>
 
         <!-- Company Domain (Password) -->
-        <div class="form-group">
-            <label for="companyDomain">Company Domain (Password)</label>
-            <input type="text" class="form-control" id="companyDomain" required>
+        <div class="card mb-3 shadow-sm rounded">
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="companyDomain">Company Domain (Password)</label>
+                    <input type="text" class="form-control rounded input-shadow" id="companyDomain" required />
+                </div>
+                <button id="domainSubmit" class="btn btn-primary btn-block btn-gradient">Proceed</button>
+            </div>
         </div>
-        <button id="domainSubmit" class="btn btn-primary mb-3">Proceed</button>
 
         <!-- Registration Form -->
-        <form id="registrationForm" class="needs-validation d-none" novalidate>
+        <form id="registrationForm" class="needs-validation d-none card p-3 shadow-sm rounded" novalidate>
             <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" class="form-control" id="name" name="name" required>
+                <label for="name" class="font-weight-bold">Name:</label>
+                <input type="text" class="form-control rounded input-shadow" id="name" required />
                 <div class="invalid-feedback">Please enter your name.</div>
             </div>
             <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <label for="email" class="font-weight-bold">Email:</label>
+                <input type="email" class="form-control rounded input-shadow" id="email" required />
                 <div class="invalid-feedback">Please enter a valid email address.</div>
             </div>
             <div class="form-group">
-                <label for="phone">Phone Number:</label>
-                <input type="tel" class="form-control" id="phone" name="phone" required>
+                <label for="phone" class="font-weight-bold">Phone Number:</label>
+                <input type="tel" class="form-control rounded input-shadow" id="phone" required />
                 <div class="invalid-feedback">Please enter your phone number.</div>
             </div>
-            <button type="submit" class="btn btn-success btn-block">Register</button>
+            <button type="submit" class="btn btn-success btn-block btn-gradient">Register</button>
         </form>
 
         <div id="confirmationMessage" class="alert alert-success mt-4 d-none"></div>
         <div id="statusMessage" class="alert d-none mt-4"></div>
+
+        <!-- Logo & Disclaimer (Collapsible Accordion) -->
+        <div class="text-center mt-5">
+            <img
+              src="https://cdn-dynmedia-1.microsoft.com/is/image/microsoftcorp/RWCZER-Legal-IP-Trademarks-CP-MS-logo-740x417-1?wid=380&hei=213&fit=crop"
+              alt="Logo"
+              style="max-width: 380px;"
+            />
+        </div>
+
+        <div class="accordion mt-3" id="disclaimerAccordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button
+                          class="btn btn-link"
+                          type="button"
+                          data-toggle="collapse"
+                          data-target="#collapseOne"
+                          aria-expanded="true"
+                          aria-controls="collapseOne"
+                        >
+                          View Disclaimer
+                        </button>
+                    </h5>
+                </div>
+                <div
+                  id="collapseOne"
+                  class="collapse"
+                  aria-labelledby="headingOne"
+                  data-parent="#disclaimerAccordion"
+                >
+                    <div class="card-body small text-muted">
+                        This application is a personal project and is not affiliated with, endorsed by,
+                        or maintained by any official company. It is built for demonstration purposes only
+                        and should not be relied upon for any official or business-critical use. The developer
+                        assumes no responsibility for any inaccuracies, issues, or consequences arising
+                        from its use.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

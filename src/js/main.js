@@ -16,12 +16,19 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(event => {
             if (!event || !event.name) {
                 dynamicHeadline.textContent = 'Event registration is closed.';
-            } else {
-                dynamicHeadline.textContent = event.name;
-                eventNameEl.textContent = `Event: ${event.name}`;
-                eventDateEl.textContent = `Date: ${event.date}`;
-                eventLocationEl.textContent = `Location: ${event.location}`;
+                return;
             }
+
+            dynamicHeadline.textContent = event.name;
+            eventNameEl.textContent = `Event: ${event.name}`;
+            eventDateEl.textContent = event.date ? `Date: ${event.date.split('T')[0]}` : '';
+            eventLocationEl.textContent = `Location: ${event.location || ''}`;
+
+            // Show start/end time on a separate line
+            const timeString = (event.startTime && event.endTime) 
+                ? `Time: ${event.startTime} - ${event.endTime}` 
+                : '';
+            document.getElementById('eventTime').textContent = timeString;
         })
         .catch(() => {
             dynamicHeadline.textContent = 'Event registration is closed.';
@@ -33,11 +40,13 @@ document.addEventListener('DOMContentLoaded', function() {
             registrationForm.classList.add('was-validated');
             return;
         }
+
         const data = {
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             phone: document.getElementById('phone').value
         };
+
         fetch('/api/registrants', {
             method: 'POST',
             headers: {
@@ -46,22 +55,26 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(data)
         })
-        .then(resp => resp.json())
-        .then(body => {
-            if (!resp.ok) {
+        .then(response => {
+            // Parse body AND keep response object
+            return response.json().then(body => ({ response, body }));
+        })
+        .then(({ response, body }) => {
+            if (!response.ok) {
                 showStatusMessage(`Registration failed: ${body.message}`, 'danger');
                 return;
             }
             registrationForm.reset();
             registrationForm.classList.remove('was-validated');
             registrationForm.classList.add('d-none');
+
             const confirmationMessage = document.getElementById('confirmationMessage');
             confirmationMessage.textContent = body.message;
             confirmationMessage.classList.remove('d-none');
         })
-        .catch(err => {
-            console.error('Error:', err);
-            showStatusMessage(`An error occurred: ${err.message}. please contact event administrator.`, 'danger');
+        .catch(error => {
+            console.error('Error:', error);
+            showStatusMessage(`An error occurred: ${error.message}. please contact event administrator.`, 'danger');
         });
     });
 
