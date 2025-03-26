@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const eventName = document.getElementById('event-name').value;
         const eventDate = document.getElementById('event-date').value;
         const eventLocation = document.getElementById('event-location').value;
+        const domain = document.getElementById('event-domain').value;        // include domain
+        const startTime = document.getElementById('event-startTime').value;  // include startTime
+        const endTime = document.getElementById('event-endTime').value;      // include endTime
 
         fetch('/api/events', {
             method: 'POST',
@@ -47,7 +50,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/json',
                 'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
             },
-            body: JSON.stringify({ name: eventName, date: eventDate, location: eventLocation })
+            body: JSON.stringify({ 
+                name: eventName, 
+                date: eventDate, 
+                location: eventLocation,
+                domain: domain,
+                startTime: startTime,
+                endTime: endTime
+            })
         })
         .then(response => response.json().then(body => {
             if (response.ok) {
@@ -241,7 +251,11 @@ function deleteRegistrant(id) {
     if (!confirm("Are you sure you want to delete this registrant?")) return;
 
     fetch(`/api/registrants/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include', // Ensures cookies are sent
+        headers: {
+            'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
+        }
     })
     .then(res => res.json())
     .then(body => {
@@ -250,3 +264,51 @@ function deleteRegistrant(id) {
     })
     .catch(err => console.error("Error deleting registrant:", err));
 }
+
+function loadRegistrants() {
+  const registrationTableBody = document.getElementById('registration-table').querySelector('tbody');
+  registrationTableBody.innerHTML = '';
+  fetch('/api/registrants')
+    .then(res => res.json())
+    .then(registrants => {
+      registrants.forEach(reg => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${reg.fullName || reg.name}</td>
+          <td>${reg.email}</td>
+          <td>${reg.eventId || ''}</td>
+          <td>
+              <button class="btn btn-sm btn-warning" onclick="editRegistrant('${reg.id}')">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteRegistrant('${reg.id}')">Delete</button>
+          </td>
+        `;
+        registrationTableBody.appendChild(row);
+      });
+    })
+    .catch(err => console.error('Error fetching registrants:', err));
+}
+
+function deleteRegistrant(id) {
+  if (!confirm('Are you sure you want to delete this registrant?')) return;
+  fetch(`/api/registrants/${id}`, { 
+    method: 'DELETE',
+    credentials: 'include', // Ensures cookies are sent
+    headers: {
+      'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
+    }
+  })
+    .then(res => res.json())
+    .then(body => {
+      if (!res.ok) {
+        showStatusMessage(`Failed to delete: ${body.message}`, 'danger');
+        return;
+      }
+      showStatusMessage(body.message, 'success');
+      loadRegistrants();
+    })
+    .catch(err => console.error('Error deleting registrant:', err));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadRegistrants();
+});

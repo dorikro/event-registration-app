@@ -225,6 +225,21 @@ app.put('/api/registrants/:id', [
   });
 });
 
+app.delete('/api/registrants/:id', (req, res) => {
+  const registrantId = req.params.id;
+  client.hdel('registrants', registrantId, (err, reply) => {
+    if (err) {
+      console.error('Redis error deleting registrant:', err);
+      return res.status(500).json({ message: 'Redis error', error: err.message });
+    }
+    if (reply === 0) {
+      return res.status(404).json({ message: 'Registrant not found' });
+    }
+    console.log('Registrant deleted:', registrantId);
+    res.json({ message: 'Registrant deleted successfully' });
+  });
+});
+
 // Test Redis connection
 app.get('/api/test-redis', (req, res) => {
   client.set('test-key', 'test-value', (err) => {
